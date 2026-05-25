@@ -31,83 +31,101 @@ STEP-8: Repeat the above steps to generate the entire cipher text.
 
 ## PROGRAM
 ```
-
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
-#include <stdlib.h>
+#include <ctype.h>
 
-void encipher();
-void decipher();
+#define MAX_LEN 100
+
+// Function to encrypt the plaintext
+void vigenereEncrypt(char plaintext[], char keyword[], char ciphertext[]) {
+    int ptLen = strlen(plaintext);
+    int kwLen = strlen(keyword);
+    int i, j = 0;
+
+    for (i = 0; i < ptLen; i++) {
+        if (isalpha(plaintext[i])) {
+            char ptChar = toupper(plaintext[i]);
+            char kwChar = toupper(keyword[j % kwLen]);
+
+            // STEP-6 & 7: Encryption math -> (P + K) % 26
+            char cipherChar = ((ptChar - 'A') + (kwChar - 'A')) % 26 + 'A';
+            
+            if (islower(plaintext[i])) {
+                ciphertext[i] = tolower(cipherChar);
+            } else {
+                ciphertext[i] = cipherChar;
+            }
+            j++;
+        } else {
+            ciphertext[i] = plaintext[i];
+        }
+    }
+    ciphertext[ptLen] = '\0';
+}
+
+// Function to decrypt the ciphertext back to plaintext
+void vigenereDecrypt(char ciphertext[], char keyword[], char decryptedtext[]) {
+    int ctLen = strlen(ciphertext);
+    int kwLen = strlen(keyword);
+    int i, j = 0;
+
+    for (i = 0; i < ctLen; i++) {
+        if (isalpha(ciphertext[i])) {
+            char ctChar = toupper(ciphertext[i]);
+            char kwChar = toupper(keyword[j % kwLen]);
+
+            // Decryption math -> (C - K + 26) % 26
+            // We add 26 to handle negative results gracefully in C
+            char decChar = ((ctChar - 'A') - (kwChar - 'A') + 26) % 26 + 'A';
+            
+            if (islower(ciphertext[i])) {
+                decryptedtext[i] = tolower(decChar);
+            } else {
+                decryptedtext[i] = decChar;
+            }
+            j++;
+        } else {
+            decryptedtext[i] = ciphertext[i];
+        }
+    }
+    decryptedtext[ctLen] = '\0';
+}
 
 int main() {
-    int choice;
-    while (1) {
-        printf("\n1. Encrypt Text");
-        printf("\t2. Decrypt Text");
-        printf("\t3. Exit");
-        printf("\n\nEnter Your Choice: ");
-        scanf("%d", &choice);
+    char plaintext[MAX_LEN];
+    char keyword[MAX_LEN];
+    char ciphertext[MAX_LEN];
+    char decryptedtext[MAX_LEN];
 
-        if (choice == 3)
-            return 0; // Proper exit
-        else if (choice == 1)
-            encipher();
-        else if (choice == 2)
-            decipher();
-        else
-            printf("Please Enter a Valid Option.\n");
-    }
-}
+    // Read inputs
+    printf("Enter the plain text: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    plaintext[strcspn(plaintext, "\n")] = '\0';
 
-void encipher() {
-    unsigned int i, j;
-    char input[50], key[10];
+    printf("Enter the key : ");
+    fgets(keyword, sizeof(keyword), stdin);
+    keyword[strcspn(keyword, "\n")] = '\0';
 
-    printf("\n\nEnter Plain Text: ");
-    scanf("%s", input);
+    // 1. Run Encryption
+    vigenereEncrypt(plaintext, keyword, ciphertext);
 
-    printf("\nEnter Key Value: ");
-    scanf("%s", key);
+    // 2. Run Decryption using the generated ciphertext
+    vigenereDecrypt(ciphertext, keyword, decryptedtext);
 
-    printf("\nResultant Cipher Text: ");
-    for (i = 0, j = 0; i < strlen(input); i++, j++) {
-        if (j >= strlen(key)) {
-            j = 0;
-        }
-        printf("%c", 65 + (((toupper(input[i]) - 65) + (toupper(key[j]) - 65)) % 26));
-    }
-    printf("\n");
-}
+    // Output Results
+    printf("\nOriginal Plain Text: %s\n", plaintext);
+    printf("Key:             %s\n", keyword);
+    printf("Encrypted Cipher:    %s\n", ciphertext);
+    printf("Decrypted Text:      %s\n", decryptedtext);
 
-void decipher() {
-    unsigned int i, j;
-    char input[50], key[10];
-    int value;
-
-    printf("\n\nEnter Cipher Text: ");
-    scanf("%s", input);
-
-    printf("\nEnter the Key Value: ");
-    scanf("%s", key);
-
-    printf("\nDecrypted Plain Text: ");
-    for (i = 0, j = 0; i < strlen(input); i++, j++) {
-        if (j >= strlen(key)) {
-            j = 0; // Reset key index
-        }
-        value = (toupper(input[i]) - 65) - (toupper(key[j]) - 65);
-        if (value < 0) {
-            value += 26; // Handle negative wrap-around
-        }
-        printf("%c", 65 + (value % 26));
-    }
-    printf("\n");
+    return 0;
 }
 ```
 
 ## OUTPUT
-<img width="1874" height="964" alt="image" src="https://github.com/user-attachments/assets/454d45c7-d2ff-4285-9c74-dd2ce336d160" />
+<img width="1872" height="964" alt="Crypto Exp-4" src="https://github.com/user-attachments/assets/9d71da63-556d-42b6-bcdf-fef4e05d4608" />
+
 
 
 ## RESULT
